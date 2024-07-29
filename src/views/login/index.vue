@@ -1,9 +1,10 @@
 <template>
   <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+  <div v-if="register">
+      <el-form ref="registerForm" :model="registerForm" :rules="registerRules" class="login-form"  label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">注册</h3>
       </div>
 
       <el-form-item prop="username">
@@ -11,12 +12,84 @@
           <svg-icon icon-class="user" />
         </span>
         <el-input
+         
           ref="username"
-          v-model="loginForm.username"
-          placeholder="Username"
+          v-model="registerForm.username"
+          placeholder="用户名"
           name="username"
           type="text"
-          tabindex="1"
+        />
+      </el-form-item>
+
+      <el-form-item prop="email">
+        <span class="svg-container">
+          <svg-icon icon-class="email" />
+        </span>
+        <el-input
+          ref="email"
+          v-model="registerForm.email"
+          placeholder="邮箱"
+          name="email"
+          type="text"
+        />
+      </el-form-item>
+
+      <el-form-item prop="password">
+        <span class="svg-container">
+          <svg-icon icon-class="password" />
+        </span>
+        <el-input
+          :key="passwordType"
+          ref="password"
+          v-model="registerForm.password"
+          :type="passwordType"
+          placeholder="密码"
+          name="password"
+        />
+        <span class="show-pwd" @click="showPwd">
+          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+        </span>
+      </el-form-item>
+
+      <el-form-item prop="confirm_password">
+        <span class="svg-container">
+          <svg-icon icon-class="password" />
+        </span>
+        <el-input
+          :key="passwordType"
+          ref="confirm_password"
+          v-model="registerForm.confirm_password"
+          :type="passwordType"
+          placeholder="确认密码"
+          name="confirm_password"
+        />
+        <span class="show-pwd" @click="showPwd">
+          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+        </span>
+      </el-form-item>
+
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleRegister">注册</el-button>
+      <div><el-button type="text" @click="toLogin">登录</el-button></div>
+
+    </el-form>
+  </div>
+  <div v-else>
+    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+
+      <div class="title-container">
+        <h3 class="title">登录</h3>
+      </div>
+
+      <el-form-item prop="email">
+        <span class="svg-container">
+          <svg-icon icon-class="email" />
+        </span>
+        <el-input
+          ref="email"
+          v-model="loginForm.email"
+          placeholder="邮箱"
+          name="email"
+          type="text"
           auto-complete="on"
         />
       </el-form-item>
@@ -30,9 +103,8 @@
           ref="password"
           v-model="loginForm.password"
           :type="passwordType"
-          placeholder="Password"
+          placeholder="密码"
           name="password"
-          tabindex="2"
           auto-complete="on"
           @keyup.enter.native="handleLogin"
         />
@@ -41,14 +113,14 @@
         </span>
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
-
-      <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: any</span>
-      </div>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
+      <div><el-button type="text" @click="toRegister">注册</el-button></div>
 
     </el-form>
+  </div>
+
+
+      
   </div>
 </template>
 
@@ -58,32 +130,62 @@ import { validUsername } from '@/utils/validate'
 export default {
   name: 'Login',
   data() {
+    const validateEmail = (rule, value, callback) => {
+      var verify = /^\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/
+      if (!verify.test(value)) {
+        callback(new Error('邮箱格式错误'))
+      } else {
+        callback()
+      }
+    }
     const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+      if (value.length < 2) {
+        callback(new Error('用户名不得少于2个字符'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('密码不得少于6个字符'))
       } else {
+        callback()
+      }
+    }
+    const validateConfirmPassword = (rule, value, callback) => {
+      if (value == "") {
+        callback(new Error('请输入确认密码'))
+      } else if (value!=this.registerForm.password){
+        callback(new Error("两次输入的密码不一致"))
+      }else {
         callback()
       }
     }
     return {
       loginForm: {
-        username: 'admin',
+        email: 'admin',
         password: '111111'
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        email: [{ required: true, trigger: 'blur', validator: validateEmail }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+      },
+      registerForm:{
+        username: "",
+        password: "",
+        confirm_password: "",
+        email: "",
+      },
+      registerRules:{
+        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
+        confirm_password: [{ required: true, trigger: 'blur', validator: validateConfirmPassword }],
+        email: [{ required: true, trigger: 'blur', validator: validateEmail }],
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: undefined,
+      register:false,
     }
   },
   watch: {
@@ -105,6 +207,16 @@ export default {
         this.$refs.password.focus()
       })
     },
+    toLogin(){
+      this.$refs.registerForm.clearValidate()
+      this.$refs.registerForm.resetFields()
+      this.register = false
+    },
+    toRegister(){
+      this.$refs.loginForm.clearValidate()
+      this.$refs.loginForm.resetFields()
+      this.register = true
+    },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
@@ -115,6 +227,23 @@ export default {
           }).catch(() => {
             this.loading = false
           })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    handleRegister(){
+      this.$refs.registerForm.validate(valid => {
+        if (valid) {
+          this.loading = true
+          console.log("register")
+          // this.$store.dispatch('user/register', this.registerForm).then(() => {
+          //   this.$router.push({ path: this.redirect || '/' })
+          //   this.loading = false
+          // }).catch(() => {
+          //   this.loading = false
+          // })
         } else {
           console.log('error submit!!')
           return false
