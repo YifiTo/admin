@@ -29,9 +29,6 @@
       <div><el-button type="text" @click="toRegister">注册</el-button></div>
 
     </el-form>
-
-
-
   </div>
 </template>
 
@@ -85,9 +82,9 @@ export default{
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          let params = {...loginForm}
+          let params = {...this.loginForm}
           params.password = encrypt(params.password)
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
+          this.$store.dispatch('user/login', params).then(() => {
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
           }).catch(() => {

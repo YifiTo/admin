@@ -27,9 +27,6 @@
         </span>
         <el-input :key="passwordType" ref="password" v-model="registerForm.password" :type="passwordType"
           placeholder="密码" name="password" />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
-        </span>
       </el-form-item>
 
       <el-form-item prop="confirm_password">
@@ -38,9 +35,6 @@
         </span>
         <el-input :key="passwordType" ref="confirm_password" v-model="registerForm.confirm_password"
           :type="passwordType" placeholder="确认密码" name="confirm_password" />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
-        </span>
       </el-form-item>
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;"
@@ -55,6 +49,7 @@
 <script>
 import { encrypt } from '@/utils/crypto'
 import { Message } from 'element-ui';
+import { register } from '@/api/user'
 
 export default {
   name: 'Register',
@@ -122,25 +117,24 @@ export default {
     handleRegister() {
       this.$refs.registerForm.validate(valid => {
         if (valid) {
-          // this.loading = true
+          this.loading = true
           console.log("register")
           let params = { ...this.registerForm }
           params.password = encrypt(params.password)
           params.confirm_password = encrypt(params.confirm_password)
-          console.log(params)
-          Message({
-            message: '恭喜您注册成功，需登录后才能使用',
-            type: 'success',
-            duration: 5000
-          })
-          this.toLogin()
 
-          // this.$store.dispatch('user/register', this.registerForm).then(() => {
-          //   this.$router.push({ path: this.redirect || '/' })
-          //   this.loading = false
-          // }).catch(() => {
-          //   this.loading = false
-          // })
+          register(params).then(() => {
+            this.loading = false
+            Message({
+              message: '恭喜您注册成功，请登录',
+              type: 'success',
+              duration: 5000
+            })
+            this.toLogin()
+
+          }).catch(() => {
+            this.loading = false
+          })
         } else {
           console.log('error submit!!')
           return false
