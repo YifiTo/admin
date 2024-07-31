@@ -33,9 +33,10 @@ function unregisterRoutes() {
 
 // for mock server
 const responseFake = (url, type, respond) => {
-  if(!url.startsWith("/vue-admin-template")){
-    return
-  }
+  console.log("mock url", url)
+  // if(!url.startsWith("/vue-admin-template")){
+  //   return
+  // }
   return {
     url: new RegExp(`${process.env.VUE_APP_BASE_API}${url}`),
     type: type || 'get',

@@ -36,14 +36,15 @@ module.exports = {
       warnings: false,
       errors: true
     },
-    // proxy: {
-    //   "/dev-api":{
-    //     target: "http://127.0.0.1:5000",
-    //     changeOrigin: true,
-    //     secure: false,
-    //     pathRewrite: {['^/dev-api']: '/'}
-    //   }
-    // },
+    proxy: {
+      '/dev-api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/dev-api': ''
+        }
+      }
+    },
     before: require('./mock/mock-server.js')
   },
   configureWebpack: {
