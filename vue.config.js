@@ -42,6 +42,14 @@ module.exports = {
         changeOrigin: true,
         pathRewrite: {
           '^/dev-api': ''
+        },
+        // 处理POST请求的请求体
+        onProxyReq: (proxyReq, req, res) => {
+          if (req.body) {
+            const bodyData = JSON.stringify(req.body);
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            proxyReq.write(bodyData);
+          }
         }
       }
     },
